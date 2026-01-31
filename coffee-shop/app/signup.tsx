@@ -5,26 +5,44 @@ import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, S
 import IntroImage from '../assets/images/coffee/intro.svg';
 import { useAuth } from '../store/AuthProvider';
 
-export default function SignInScreen() {
+export default function SignUpScreen() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const router = useRouter();
-  const { login, isLoading, error, clearError } = useAuth();
+  const { register, isLoading, error, clearError } = useAuth();
 
   useEffect(() => {
     if (error) {
-      Alert.alert('Sign in failed', error);
+      Alert.alert('Sign up failed', error);
       clearError();
     }
   }, [error, clearError]);
 
-  const handleSignIn = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please enter email and password');
+  const handleSignUp = async () => {
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
-    const success = await login(email.trim().toLowerCase(), password.trim());
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    if (password.length < 4) {
+      Alert.alert('Error', 'Password must be at least 4 characters');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      Alert.alert('Error', 'Please enter a valid email');
+      return;
+    }
+
+    const success = await register(email.trim().toLowerCase(), name.trim(), password.trim());
     if (success) {
       router.replace('/(tabs)');
     }
@@ -39,11 +57,23 @@ export default function SignInScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         
         <View style={styles.logoContainer}>
-          <IntroImage width={150} height={150} />
-          <Text style={styles.brandName}>CoffeeShop</Text>
+          <IntroImage width={120} height={120} />
+          <Text style={styles.brandName}>Create Account</Text>
         </View>
 
         <View style={styles.formContainer}>
+          <View style={styles.inputWrapper}>
+             <TextInput
+              style={styles.input}
+              placeholder="Name"
+              placeholderTextColor="#666"
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+              editable={!isLoading}
+             />
+          </View>
+
           <View style={styles.inputWrapper}>
              <TextInput
               style={styles.input}
@@ -69,23 +99,35 @@ export default function SignInScreen() {
              />
           </View>
 
+          <View style={styles.inputWrapper}>
+             <TextInput
+              style={styles.input}
+              placeholder="Confirm password"
+              placeholderTextColor="#666"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+              editable={!isLoading}
+             />
+          </View>
+
           <TouchableOpacity 
             style={[styles.button, isLoading && styles.buttonDisabled]} 
-            onPress={handleSignIn}
+            onPress={handleSignUp}
             disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text style={styles.buttonText}>Sign in</Text>
+              <Text style={styles.buttonText}>Sign up</Text>
             )}
           </TouchableOpacity>
 
-          <View style={styles.signupContainer}>
-            <Text style={styles.signupText}>Don&apos;t have an account? </Text>
-            <Link href={"/signup" as any} asChild>
+          <View style={styles.signinContainer}>
+            <Text style={styles.signinText}>Already have an account? </Text>
+            <Link href="/signin" asChild>
               <TouchableOpacity>
-                <Text style={styles.signupLink}>Sign up</Text>
+                <Text style={styles.signinLink}>Sign in</Text>
               </TouchableOpacity>
             </Link>
           </View>
@@ -108,7 +150,7 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 60,
+    marginBottom: 40,
   },
   brandName: {
     fontSize: 24,
@@ -117,7 +159,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   formContainer: {
-    gap: 20,
+    gap: 16,
   },
   inputWrapper: {
     backgroundColor: '#2A323C',
@@ -136,7 +178,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 16,
     shadowColor: '#D17842',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -151,16 +193,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  signupContainer: {
+  signinContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 20,
   },
-  signupText: {
+  signinText: {
     color: '#888',
     fontSize: 14,
   },
-  signupLink: {
+  signinLink: {
     color: '#D17842',
     fontSize: 14,
     fontWeight: '600',

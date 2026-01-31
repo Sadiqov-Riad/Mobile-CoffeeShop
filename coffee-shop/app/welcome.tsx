@@ -43,7 +43,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#1E252D',
-        paddingBottom: 40,
     },
     imageWrapper: {
         width: "120%",
@@ -54,8 +53,11 @@ const styles = StyleSheet.create({
     },
 
     contentContainer: {
+        flex: 1,
         paddingHorizontal: 24,
+        paddingBottom: 40,
         gap: 40,
+        justifyContent: 'space-between',
     },
     textWrapper: {
         gap: 12,
